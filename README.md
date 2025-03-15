@@ -14,4 +14,4 @@ This repository contains lab assignments for the PHP frameworks course.
 
 ## To-Do List
 - [x] Lab 1
-- [ ] Lab 2
+- [x] Lab 2
