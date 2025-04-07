@@ -16,10 +16,23 @@ class PostController extends Controller
         $this->postService = $postService;
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $posts = $this->postService->getAllPosts();
-        return response()->json($posts);
+        $requestData = $request->query->all();
+        $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+
+        $postsData = $this->postService->getAllPosts($requestData);
+        $posts = array_map(fn($post) => $post->jsonSerialize(), $postsData['posts']);
+
+        return response()->json([
+            'data' => $posts,
+            'meta' => [
+                'totalItems' => $postsData['totalItems'],
+                'totalPageCount' => $postsData['totalPageCount'],
+                'currentPage' => $page,
+            ]
+        ]);
     }
 
     public function show($id): \Illuminate\Http\JsonResponse

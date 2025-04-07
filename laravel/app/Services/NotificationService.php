@@ -21,9 +21,11 @@ class NotificationService
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    public function getAllNotifications()
+    public function getAllNotifications(array $params = []): array
     {
-        return $this->notificationRepository->findAllNotifications();
+        $itemsPerPage = isset($params['itemsPerPage']) ? (int)$params['itemsPerPage'] : 10;
+        $page = isset($params['page']) ? (int)$params['page'] : 1;
+        return $this->notificationRepository->getAllNotificationsByFilter($params, $itemsPerPage, $page);
     }
 
     public function getNotification($id)

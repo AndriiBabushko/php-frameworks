@@ -24,9 +24,11 @@ class CommentService
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    public function getAllComments()
+    public function getAllComments(array $params = []): array
     {
-        return $this->commentRepository->findAllComments();
+        $itemsPerPage = isset($params['itemsPerPage']) ? (int)$params['itemsPerPage'] : 10;
+        $page = isset($params['page']) ? (int)$params['page'] : 1;
+        return $this->commentRepository->getAllCommentsByFilter($params, $itemsPerPage, $page);
     }
 
     public function getComment($id)

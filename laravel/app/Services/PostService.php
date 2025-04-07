@@ -21,9 +21,11 @@ class PostService
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    public function getAllPosts()
+    public function getAllPosts(array $params = []): array
     {
-        return $this->postRepository->findAllPosts();
+        $itemsPerPage = isset($params['itemsPerPage']) ? (int)$params['itemsPerPage'] : 10;
+        $page = isset($params['page']) ? (int)$params['page'] : 1;
+        return $this->postRepository->getAllPostsByFilter($params, $itemsPerPage, $page);
     }
 
     public function getPost($id)

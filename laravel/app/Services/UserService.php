@@ -20,9 +20,11 @@ class UserService
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    public function getAllUsers()
+    public function getAllUsers(array $params = []): array
     {
-        return $this->userRepository->findAllUsers();
+        $itemsPerPage = isset($params['itemsPerPage']) ? (int)$params['itemsPerPage'] : 10;
+        $page = isset($params['page']) ? (int)$params['page'] : 1;
+        return $this->userRepository->getAllUsersByFilter($params, $itemsPerPage, $page);
     }
 
     public function getUser($id)

@@ -16,10 +16,23 @@ class NotificationController extends Controller
         $this->notificationService = $notificationService;
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $notifications = $this->notificationService->getAllNotifications();
-        return response()->json($notifications);
+        $requestData = $request->query->all();
+        $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+
+        $notificationsData = $this->notificationService->getAllNotifications($requestData);
+        $notifications = array_map(fn($notification) => $notification->jsonSerialize(), $notificationsData['notifications']);
+
+        return response()->json([
+            'data' => $notifications,
+            'meta' => [
+                'totalItems' => $notificationsData['totalItems'],
+                'totalPageCount' => $notificationsData['totalPageCount'],
+                'currentPage' => $page,
+            ]
+        ], Response::HTTP_OK);
     }
 
     public function show($id): \Illuminate\Http\JsonResponse

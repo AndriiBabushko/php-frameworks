@@ -24,9 +24,11 @@ class ReactionService
         $this->userRepository = $em->getRepository(User::class);
     }
 
-    public function getAllReactions()
+    public function getAllReactions(array $params = []): array
     {
-        return $this->reactionRepository->findAllReactions();
+        $itemsPerPage = isset($params['itemsPerPage']) ? (int)$params['itemsPerPage'] : 10;
+        $page = isset($params['page']) ? (int)$params['page'] : 1;
+        return $this->reactionRepository->getAllReactionsByFilter($params, $itemsPerPage, $page);
     }
 
     public function getReaction($id)

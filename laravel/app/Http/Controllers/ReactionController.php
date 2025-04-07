@@ -16,10 +16,23 @@ class ReactionController extends Controller
         $this->reactionService = $reactionService;
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $reactions = $this->reactionService->getAllReactions();
-        return response()->json($reactions);
+        $requestData = $request->query->all();
+        $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+
+        $reactionsData = $this->reactionService->getAllReactions($requestData);
+        $reactions = array_map(fn($reaction) => $reaction->jsonSerialize(), $reactionsData['reactions']);
+
+        return response()->json([
+            'data' => $reactions,
+            'meta' => [
+                'totalItems' => $reactionsData['totalItems'],
+                'totalPageCount' => $reactionsData['totalPageCount'],
+                'currentPage' => $page,
+            ]
+        ]);
     }
 
     public function show($id): \Illuminate\Http\JsonResponse

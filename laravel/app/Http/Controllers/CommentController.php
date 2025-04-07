@@ -16,10 +16,23 @@ class CommentController extends Controller
         $this->commentService = $commentService;
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $comments = $this->commentService->getAllComments();
-        return response()->json($comments);
+        $requestData = $request->query->all();
+        $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+
+        $commentsData = $this->commentService->getAllComments($requestData);
+        $comments = array_map(fn($comment) => $comment->jsonSerialize(), $commentsData['comments']);
+
+        return response()->json([
+            'data' => $comments,
+            'meta' => [
+                'totalItems' => $commentsData['totalItems'],
+                'totalPageCount' => $commentsData['totalPageCount'],
+                'currentPage' => $page,
+            ]
+        ]);
     }
 
     public function show($id): \Illuminate\Http\JsonResponse

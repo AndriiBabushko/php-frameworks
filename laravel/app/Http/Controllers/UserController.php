@@ -16,10 +16,23 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function index(): \Illuminate\Http\JsonResponse
+    public function index(Request $request): \Illuminate\Http\JsonResponse
     {
-        $users = $this->userService->getAllUsers();
-        return response()->json($users);
+        $requestData = $request->query->all();
+        $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
+        $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
+
+        $usersData = $this->userService->getAllUsers($requestData);
+        $users = array_map(fn($user) => $user->jsonSerialize(), $usersData['users']);
+
+        return response()->json([
+            'data' => $users,
+            'meta' => [
+                'totalItems' => $usersData['totalItems'],
+                'totalPageCount' => $usersData['totalPageCount'],
+                'currentPage' => $page,
+            ]
+        ]);
     }
 
     public function show($id): \Illuminate\Http\JsonResponse
