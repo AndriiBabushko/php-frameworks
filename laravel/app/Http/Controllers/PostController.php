@@ -2,80 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PostService;
 use Illuminate\Http\Request;
-use App\Models\Post;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Validation\ValidationException;
 
 class PostController extends Controller
 {
-    // Діагностичний маршрут для перевірки DATABASE_URL та APP_ENV
-    // GET /api/posts/debug
-    public function debugDbUrl(): JsonResponse
+    private PostService $postService;
+
+    public function __construct(PostService $postService)
     {
-        return response()->json([
-            'db_url'  => env('DATABASE_URL'),
-            'APP_ENV' => env('APP_ENV')
-        ]);
+        $this->postService = $postService;
     }
 
-    // GET /api/posts
-    public function index(): JsonResponse
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        // Завантажуємо користувача, якщо потрібен зв'язок
-        $posts = Post::with('user')->get();
-        return response()->json(['data' => $posts]);
+        $posts = $this->postService->getAllPosts();
+        return response()->json($posts);
     }
 
-    // GET /api/posts/{id}
-    public function show($id): JsonResponse
+    public function show($id): \Illuminate\Http\JsonResponse
     {
-        $post = Post::with('user')->find($id);
+        $post = $this->postService->getPost($id);
         if (!$post) {
-            return response()->json(['error' => 'Post not found'], 404);
+            return response()->json(['message' => 'Post not found'], 404);
         }
-        return response()->json(['data' => $post]);
+        return response()->json($post);
     }
 
-    // POST /api/posts
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-        $data = $request->validate([
-            'content'  => 'required|string',
-            'image_url'=> 'nullable|string',
-            'user_id'  => 'required|exists:users,id'
-        ]);
-
-        $post = Post::create($data);
-        return response()->json(['data' => $post], 201);
+        $data = $request->only(['title', 'content', 'imageUrl', 'author_id']);
+        try {
+            $post = $this->postService->createPost($data);
+            return response()->json($post, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => $e->getMessage()], 400);
+        }
     }
 
-    // PUT /api/posts/{id}
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        $post = Post::find($id);
-        if (!$post) {
-            return response()->json(['error' => 'Post not found'], 404);
+        $data = $request->only(['title', 'content', 'imageUrl', 'author_id']);
+        try {
+            $post = $this->postService->updatePost($id, $data);
+            if (!$post) {
+                return response()->json(['message' => 'Post not found'], 404);
+            }
+            return response()->json($post);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => $e->getMessage()], 400);
         }
-
-        $data = $request->validate([
-            'content'  => 'sometimes|required|string',
-            'image_url'=> 'nullable|string'
-        ]);
-
-        $post->update($data);
-        return response()->json(['data' => $post]);
     }
 
-    // DELETE /api/posts/{id}
-    public function destroy($id): JsonResponse
+    public function destroy($id): \Illuminate\Http\JsonResponse
     {
-        $post = Post::find($id);
-        if (!$post) {
-            return response()->json(['error' => 'Post not found'], 404);
+        $deleted = $this->postService->deletePost($id);
+        if (!$deleted) {
+            return response()->json(['message' => 'Post not found'], 404);
         }
-
-        $post->delete();
         return response()->json(['message' => 'Post deleted successfully']);
     }
 }

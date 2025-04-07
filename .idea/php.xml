@@ -8,11 +8,6 @@
       <LaravelPintConfiguration tool_path="$PROJECT_DIR$/laravel/vendor/bin/pint" />
     </laravel_pint_settings>
   </component>
-  <component name="MessDetector">
-    <phpmd_settings>
-      <phpmd_by_interpreter asDefaultInterpreter="true" interpreter_id="aafb6849-8468-42b7-a2d1-c18849efa377" timeout="30000" />
-    </phpmd_settings>
-  </component>
   <component name="MessDetectorOptionsConfiguration">
     <option name="transferred" value="true" />
   </component>
@@ -27,11 +22,6 @@
     <phpcsfixer_settings>
       <phpcs_fixer_by_interpreter asDefaultInterpreter="true" interpreter_id="aafb6849-8468-42b7-a2d1-c18849efa377" timeout="30000" />
     </phpcsfixer_settings>
-  </component>
-  <component name="PhpCodeSniffer">
-    <phpcs_settings>
-      <phpcs_by_interpreter asDefaultInterpreter="true" interpreter_id="aafb6849-8468-42b7-a2d1-c18849efa377" timeout="30000" />
-    </phpcs_settings>
   </component>
   <component name="PhpIncludePathManager">
     <include_path>
@@ -292,8 +282,8 @@
   </component>
   <component name="PhpUnit">
     <phpunit_settings>
-      <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/symfony/phpunit.xml.dist" custom_loader_path="$PROJECT_DIR$/symfony/vendor/autoload.php" use_configuration_file="true" />
       <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/laravel/phpunit.xml" custom_loader_path="$PROJECT_DIR$/laravel/vendor/autoload.php" use_configuration_file="true" />
+      <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/symfony/phpunit.xml.dist" custom_loader_path="$PROJECT_DIR$/symfony/vendor/autoload.php" use_configuration_file="true" />
     </phpunit_settings>
   </component>
   <component name="Psalm">

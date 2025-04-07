@@ -2,14 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\PostRepository;
+use App\Repository\CommentRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: PostRepository::class)]
-#[ORM\Table(name: 'posts')]
-class Post
+#[ORM\Entity(repositoryClass: CommentRepository::class)]
+#[ORM\Table(name: 'comments')]
+class Comment
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,32 +22,25 @@ class Post
     #[Assert\NotNull(message: "Content cannot be null.")]
     #[Assert\Length(
         min: 1,
-        max: 5000,
+        max: 1000,
         minMessage: "Content must be at least {{ limit }} character long.",
-        maxMessage: "Content cannot exceed {{ limit }} characters."
+        maxMessage: "Content cannot be longer than {{ limit }} characters."
     )]
     private ?string $content = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url(message: "ImageUrl must be a valid URL.")]
-    #[Assert\Length(
-        max: 255,
-        maxMessage: "ImageUrl cannot exceed {{ limit }} characters."
-    )]
-    private ?string $imageUrl = null;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotNull(message: "CreatedAt cannot be null.")]
-    #[Assert\Type(\DateTimeInterface::class, message: "CreatedAt must be a valid datetime.")]
-    private ?\DateTimeInterface $createdAt = null;
+    #[Assert\Type(DateTimeInterface::class, message: "CreatedAt must be a valid datetime.")]
+    private ?DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Assert\Type(\DateTimeInterface::class, message: "UpdatedAt must be a valid datetime.")]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\ManyToOne(targetEntity: Post::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Post must be associated with the comment.")]
+    private ?Post $post = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: "User must be specified.")]
+    #[Assert\NotNull(message: "User must be associated with the comment.")]
     private ?User $user = null;
 
     public function getId(): ?int
@@ -66,38 +60,26 @@ class Post
         return $this;
     }
 
-    public function getImageUrl(): ?string
-    {
-        return $this->imageUrl;
-    }
-
-    public function setImageUrl(?string $imageUrl): self
-    {
-        $this->imageUrl = $imageUrl;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getPost(): ?Post
     {
-        return $this->updatedAt;
+        return $this->post;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    public function setPost(?Post $post): self
     {
-        $this->updatedAt = $updatedAt;
+        $this->post = $post;
 
         return $this;
     }

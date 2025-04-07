@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\PostRepository;
+use App\Repository\MessageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: PostRepository::class)]
-#[ORM\Table(name: 'posts')]
-class Post
+#[ORM\Entity(repositoryClass: MessageRepository::class)]
+#[ORM\Table(name: 'messages')]
+class Message
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,33 +21,26 @@ class Post
     #[Assert\NotNull(message: "Content cannot be null.")]
     #[Assert\Length(
         min: 1,
-        max: 5000,
+        max: 1000,
         minMessage: "Content must be at least {{ limit }} character long.",
         maxMessage: "Content cannot exceed {{ limit }} characters."
     )]
     private ?string $content = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url(message: "ImageUrl must be a valid URL.")]
-    #[Assert\Length(
-        max: 255,
-        maxMessage: "ImageUrl cannot exceed {{ limit }} characters."
-    )]
-    private ?string $imageUrl = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotNull(message: "CreatedAt cannot be null.")]
     #[Assert\Type(\DateTimeInterface::class, message: "CreatedAt must be a valid datetime.")]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    #[Assert\Type(\DateTimeInterface::class, message: "UpdatedAt must be a valid datetime.")]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "Sender must be specified.")]
+    private ?User $sender = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: "User must be specified.")]
-    private ?User $user = null;
+    #[Assert\NotNull(message: "Receiver must be specified.")]
+    private ?User $receiver = null;
 
     public function getId(): ?int
     {
@@ -66,18 +59,6 @@ class Post
         return $this;
     }
 
-    public function getImageUrl(): ?string
-    {
-        return $this->imageUrl;
-    }
-
-    public function setImageUrl(?string $imageUrl): self
-    {
-        $this->imageUrl = $imageUrl;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -90,26 +71,26 @@ class Post
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getSender(): ?User
     {
-        return $this->updatedAt;
+        return $this->sender;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    public function setSender(?User $sender): self
     {
-        $this->updatedAt = $updatedAt;
+        $this->sender = $sender;
 
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getReceiver(): ?User
     {
-        return $this->user;
+        return $this->receiver;
     }
 
-    public function setUser(?User $user): self
+    public function setReceiver(?User $receiver): self
     {
-        $this->user = $user;
+        $this->receiver = $receiver;
 
         return $this;
     }

@@ -2,62 +2,62 @@
 
 namespace App\Controller;
 
-use App\Services\PostService;
+use App\Services\CommentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/posts', name: 'post_')]
-class PostController extends AbstractController
+#[Route('/api/comments', name: 'comment_')]
+class CommentController extends AbstractController
 {
-    private PostService $postService;
+    private CommentService $commentService;
 
-    public function __construct(PostService $postService)
+    public function __construct(CommentService $commentService)
     {
-        $this->postService = $postService;
+        $this->commentService = $commentService;
     }
 
     #[Route('', name: 'get_all', methods: ['GET'])]
     public function getAll(): JsonResponse
     {
-        $posts = $this->postService->getAllPosts();
+        $comments = $this->commentService->getAllComments();
 
-        return new JsonResponse(['data' => $posts], Response::HTTP_OK);
+        return new JsonResponse(['data' => $comments], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'get_one', methods: ['GET'])]
     public function getOne(int $id): JsonResponse
     {
-        $post = $this->postService->getPostById($id);
+        $comment = $this->commentService->getCommentById($id);
 
-        return new JsonResponse(['data' => $post], Response::HTTP_OK);
+        return new JsonResponse(['data' => $comment], Response::HTTP_OK);
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $post = $this->postService->createPost($data);
+        $comment = $this->commentService->createComment($data);
 
-        return new JsonResponse(['data' => $post], Response::HTTP_CREATED);
+        return new JsonResponse(['data' => $comment], Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $post = $this->postService->updatePost($id, $data);
+        $comment = $this->commentService->updateComment($id, $data);
 
-        return new JsonResponse(['data' => $post], Response::HTTP_OK);
+        return new JsonResponse(['data' => $comment], Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): JsonResponse
     {
-        $this->postService->deletePost($id);
+        $this->commentService->deleteComment($id);
 
-        return new JsonResponse(['message' => 'Post deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Comment deleted successfully'], Response::HTTP_OK);
     }
 }

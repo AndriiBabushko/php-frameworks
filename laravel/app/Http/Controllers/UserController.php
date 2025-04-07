@@ -2,81 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Routing\Controller;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
-    // GET /api/users
-    public function index(): JsonResponse
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
     {
-        $users = User::all();
-        return response()->json(['data' => $users]);
+        $this->userService = $userService;
     }
 
-    // GET /api/users/{id}
-    public function show($id): JsonResponse
+    public function index(): \Illuminate\Http\JsonResponse
     {
-        $user = User::find($id);
+        $users = $this->userService->getAllUsers();
+        return response()->json($users);
+    }
+
+    public function show($id): \Illuminate\Http\JsonResponse
+    {
+        $user = $this->userService->getUser($id);
         if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+            return response()->json(['message' => 'User not found'], 404);
         }
-        return response()->json(['data' => $user]);
+        return response()->json($user);
     }
 
-    // POST /api/users
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-        // Валідація даних
-        $data = $request->validate([
-            'username'        => 'required|string|max:50',
-            'email'           => 'required|email|unique:users,email',
-            'password'        => 'required|string|min:6',
-            'profile_picture' => 'nullable|string'
-        ]);
-
-        // Хешування пароля
-        $data['password'] = Hash::make($data['password']);
-
-        $user = User::create($data);
-
-        return response()->json(['data' => $user], 201);
+        $data = $request->only(['username', 'email', 'password', 'profilePicture']);
+        try {
+            $user = $this->userService->createUser($data);
+            return response()->json($user, 201);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => $e->getMessage()], 400);
+        }
     }
 
-    // PUT /api/users/{id}
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id): \Illuminate\Http\JsonResponse
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+        $data = $request->only(['username', 'email', 'password', 'profilePicture']);
+        try {
+            $user = $this->userService->updateUser($id, $data);
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+            return response()->json($user);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['errors' => $e->getMessage()], 400);
         }
-
-        $data = $request->validate([
-            'username'        => 'sometimes|required|string|max:50',
-            'email'           => 'sometimes|required|email|unique:users,email,'.$id,
-            'password'        => 'sometimes|required|string|min:6',
-            'profile_picture' => 'nullable|string'
-        ]);
-
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
-
-        $user->update($data);
-        return response()->json(['data' => $user]);
     }
 
-    // DELETE /api/users/{id}
-    public function destroy($id): JsonResponse
+    public function destroy($id): \Illuminate\Http\JsonResponse
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['error' => 'User not found'], 404);
+        $deleted = $this->userService->deleteUser($id);
+        if (!$deleted) {
+            return response()->json(['message' => 'User not found'], 404);
         }
-
-        $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
 }
