@@ -277,6 +277,12 @@
       <path value="$PROJECT_DIR$/symfony/vendor/symfony/event-dispatcher-contracts" />
       <path value="$PROJECT_DIR$/symfony/vendor/symfony/finder" />
       <path value="$PROJECT_DIR$/symfony/vendor/symfony/polyfill-php83" />
+      <path value="$PROJECT_DIR$/laravel/vendor/spatie/error-solutions" />
+      <path value="$PROJECT_DIR$/laravel/vendor/spatie/ignition" />
+      <path value="$PROJECT_DIR$/laravel/vendor/spatie/flare-client-php" />
+      <path value="$PROJECT_DIR$/laravel/vendor/spatie/backtrace" />
+      <path value="$PROJECT_DIR$/laravel/vendor/spatie/laravel-ignition" />
+      <path value="$PROJECT_DIR$/laravel/vendor/laravel/sanctum" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1">

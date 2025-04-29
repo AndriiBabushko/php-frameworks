@@ -9,8 +9,6 @@ use Illuminate\Http\JsonResponse;
 
 class PostController extends Controller
 {
-    // Діагностичний маршрут для перевірки DATABASE_URL та APP_ENV
-    // GET /api/posts/debug
     public function debugDbUrl(): JsonResponse
     {
         return response()->json([
@@ -22,7 +20,6 @@ class PostController extends Controller
     // GET /api/posts
     public function index(): JsonResponse
     {
-        // Завантажуємо користувача, якщо потрібен зв'язок
         $posts = Post::with('user')->get();
         return response()->json(['data' => $posts]);
     }
