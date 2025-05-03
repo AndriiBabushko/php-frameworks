@@ -23,6 +23,8 @@ class PostController extends AbstractController
     #[Route('', name: 'get_all', methods: ['GET'])]
     public function getAll(Request $request, PostRepository $postRepository): JsonResponse
     {
+        dump($request->headers->all());
+        $this->denyAccessUnlessGranted('ROLE_CLIENT');
         $requestData = $request->query->all();
         $itemsPerPage = isset($requestData['itemsPerPage']) ? (int)$requestData['itemsPerPage'] : 10;
         $page = isset($requestData['page']) ? (int)$requestData['page'] : 1;
@@ -44,6 +46,7 @@ class PostController extends AbstractController
     #[Route('/{id}', name: 'get_one', methods: ['GET'])]
     public function getOne(int $id): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_CLIENT');
         $post = $this->postService->getPostById($id);
 
         return new JsonResponse(['data' => $post], Response::HTTP_OK);
@@ -52,6 +55,7 @@ class PostController extends AbstractController
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_MANAGER');
         $data = json_decode($request->getContent(), true);
         $post = $this->postService->createPost($data);
 
@@ -61,6 +65,7 @@ class PostController extends AbstractController
     #[Route('/{id}', name: 'update', methods: ['PUT'])]
     public function update(Request $request, int $id): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_MANAGER');
         $data = json_decode($request->getContent(), true);
         $post = $this->postService->updatePost($id, $data);
 
@@ -70,6 +75,7 @@ class PostController extends AbstractController
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(int $id): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $this->postService->deletePost($id);
 
         return new JsonResponse(['message' => 'Post deleted successfully'], Response::HTTP_OK);

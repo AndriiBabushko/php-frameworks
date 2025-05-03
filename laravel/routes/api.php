@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\NotificationController;
@@ -14,15 +15,6 @@ Route::prefix('users')->group(function () {
     Route::put('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
-
-Route::prefix('posts')->group(function () {
-    Route::get('/', [PostController::class, 'index']);
-    Route::get('/{id}', [PostController::class, 'show']);
-    Route::post('/', [PostController::class, 'store']);
-    Route::put('/{id}', [PostController::class, 'update']);
-    Route::delete('/{id}', [PostController::class, 'destroy']);
-});
-
 
 Route::prefix('reactions')->group(function () {
     Route::get('/', [ReactionController::class, 'index']);
@@ -46,5 +38,16 @@ Route::prefix('notifications')->group(function () {
     Route::post('/', [NotificationController::class, 'store']);
     Route::put('/{id}', [NotificationController::class, 'update']);
     Route::delete('/{id}', [NotificationController::class, 'destroy']);
+});
+
+Route::post('register', [AuthController::class,'register']);
+Route::post('login',    [AuthController::class,'login']);
+
+Route::middleware('auth:api')->group(function(){
+    Route::get('posts',        [PostController::class,'index'])->middleware('role:ROLE_CLIENT,ROLE_MANAGER,ROLE_ADMIN');
+    Route::get('posts/{id}',   [PostController::class,'show'])->middleware('role:ROLE_CLIENT,ROLE_MANAGER,ROLE_ADMIN');
+    Route::post('posts',       [PostController::class,'store'])->middleware('role:ROLE_MANAGER,ROLE_ADMIN');
+    Route::put('posts/{id}',   [PostController::class,'update'])->middleware('role:ROLE_MANAGER,ROLE_ADMIN');
+    Route::delete('posts/{id}',[PostController::class,'destroy'])->middleware('role:ROLE_ADMIN');
 });
 

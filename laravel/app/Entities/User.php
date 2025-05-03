@@ -3,11 +3,16 @@
 namespace App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use LaravelDoctrine\ORM\Auth\Authenticatable as DoctrineAuthenticatable;
 
 #[ORM\Entity(repositoryClass: \App\Repositories\UserRepository::class)]
 #[ORM\Table(name: "users")]
-class User implements \JsonSerializable
+class User implements \JsonSerializable, Authenticatable, JWTSubject
 {
+    use DoctrineAuthenticatable;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -20,13 +25,34 @@ class User implements \JsonSerializable
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $password = null;
+    protected string $password;
 
     #[ORM\Column(type: "datetime")]
     private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $profilePicture = null;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(name: 'remember_token', type: 'string', length: 100, nullable: true)]
+    protected string $rememberToken;
+
+    public function getRememberToken(): ?string
+    {
+        return $this->rememberToken;
+    }
+
+    public function setRememberToken($value): void
+    {
+        $this->rememberToken = $value;
+    }
+
+    public function getRememberTokenName(): string
+    {
+        return 'remember_token';
+    }
 
     public function getId(): ?int
     {
@@ -88,14 +114,40 @@ class User implements \JsonSerializable
         return $this;
     }
 
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
     public function jsonSerialize(): mixed
     {
         return [
             'id'             => $this->getId(),
             'username'       => $this->getUsername(),
             'email'          => $this->getEmail(),
-            'createdAt'      => $this->getCreatedAt() ? $this->getCreatedAt()->format('Y-m-d H:i:s') : null,
+            'createdAt'      => $this->getCreatedAt()?->format('Y-m-d H:i:s'),
             'profilePicture' => $this->getProfilePicture(),
+            'roles'          => $this->getRoles(),
+        ];
+    }
+
+    public function getJWTIdentifier(): mixed
+    {
+        return $this->getAuthIdentifier();
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            'roles'    => $this->roles,
+            'username' => $this->username,
+            'email'    => $this->email,
         ];
     }
 }
