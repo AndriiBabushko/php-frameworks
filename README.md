@@ -20,8 +20,13 @@ This repository contains lab assignments for the PHP frameworks course.
 - **Branch:** [lab4](https://github.com/AndriiBabushko/MobileLabsRN2025/tree/lab4)
 - **Description:** [lab4.pdf](lab4.pdf)
 
+### Lab 5
+- **Branch:** [lab5](https://github.com/AndriiBabushko/MobileLabsRN2025/tree/lab5)
+- **Description:** [lab5.pdf](lab5.pdf)
+
 ## To-Do List
 - [x] Lab 1
 - [x] Lab 2
 - [x] Lab 3
 - [x] Lab 4
+- [x] Lab 5
